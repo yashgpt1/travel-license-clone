@@ -1,12 +1,79 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState } from "react";
+import { Header } from "@/components/idp/Header";
+import { Banner } from "@/components/idp/Banner";
+import { LicenseCheck } from "@/components/idp/steps/LicenseCheck";
+import { CountrySelection } from "@/components/idp/steps/CountrySelection";
+import { DriverDetails } from "@/components/idp/steps/DriverDetails";
+import { PhotoUpload } from "@/components/idp/steps/PhotoUpload";
+import { PlanSelection } from "@/components/idp/steps/PlanSelection";
+import { ProgressBar } from "@/components/idp/ProgressBar";
+import { Footer } from "@/components/idp/Footer";
 
 const Index = () => {
+  const [currentStep, setCurrentStep] = useState(0);
+  const [hasLicense, setHasLicense] = useState<boolean | null>(null);
+  const [selectedCountry, setSelectedCountry] = useState("");
+  const [formData, setFormData] = useState({});
+
+  const handleLicenseCheck = (hasValidLicense: boolean) => {
+    setHasLicense(hasValidLicense);
+    if (hasValidLicense) {
+      setCurrentStep(1);
+    }
+  };
+
+  const handleCountrySelect = (country: string) => {
+    setSelectedCountry(country);
+    setCurrentStep(2);
+  };
+
+  const handleDriverDetails = (data: any) => {
+    setFormData({ ...formData, ...data });
+    setCurrentStep(3);
+  };
+
+  const handlePhotoUpload = (data: any) => {
+    setFormData({ ...formData, ...data });
+    setCurrentStep(4);
+  };
+
+  const handlePlanSelection = (data: any) => {
+    setFormData({ ...formData, ...data });
+    // Final step - would proceed to payment
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
+    <div className="min-h-screen bg-background">
+      <Banner />
+      <Header />
+      
+      <main className="container mx-auto px-4 py-8 max-w-4xl">
+        {currentStep >= 2 && (
+          <ProgressBar currentStep={currentStep - 2} totalSteps={4} />
+        )}
+
+        {currentStep === 0 && (
+          <LicenseCheck onNext={handleLicenseCheck} />
+        )}
+
+        {currentStep === 1 && (
+          <CountrySelection onNext={handleCountrySelect} />
+        )}
+
+        {currentStep === 2 && (
+          <DriverDetails onNext={handleDriverDetails} />
+        )}
+
+        {currentStep === 3 && (
+          <PhotoUpload onNext={handlePhotoUpload} />
+        )}
+
+        {currentStep === 4 && (
+          <PlanSelection onNext={handlePlanSelection} />
+        )}
+      </main>
+
+      <Footer />
     </div>
   );
 };
