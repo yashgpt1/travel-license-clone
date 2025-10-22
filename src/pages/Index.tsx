@@ -6,6 +6,7 @@ import { CountrySelection } from "@/components/idp/steps/CountrySelection";
 import { DriverDetails } from "@/components/idp/steps/DriverDetails";
 import { PhotoUpload } from "@/components/idp/steps/PhotoUpload";
 import { PlanSelection } from "@/components/idp/steps/PlanSelection";
+import { IDPGenerated } from "@/components/idp/steps/IDPGenerated";
 import { ProgressBar } from "@/components/idp/ProgressBar";
 import { Footer } from "@/components/idp/Footer";
 
@@ -38,8 +39,9 @@ const Index = () => {
   };
 
   const handlePlanSelection = (data: any) => {
-    setFormData({ ...formData, ...data });
-    // Final step - would proceed to payment
+    const finalData = { ...formData, ...data };
+    setFormData(finalData);
+    setCurrentStep(5);
   };
 
   return (
@@ -48,7 +50,7 @@ const Index = () => {
       <Header />
       
       <main className="container mx-auto px-4 py-8 max-w-4xl">
-        {currentStep >= 2 && (
+        {currentStep >= 2 && currentStep < 5 && (
           <ProgressBar currentStep={currentStep - 2} totalSteps={4} />
         )}
 
@@ -70,6 +72,10 @@ const Index = () => {
 
         {currentStep === 4 && (
           <PlanSelection onNext={handlePlanSelection} />
+        )}
+
+        {currentStep === 5 && (
+          <IDPGenerated formData={formData} />
         )}
       </main>
 
