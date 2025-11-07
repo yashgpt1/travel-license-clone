@@ -35,14 +35,64 @@ export const IDPGenerated = ({ formData }: IDPGeneratedProps) => {
 
       // Helper function to fetch and embed images
       const fetchAndEmbedImage = async (imagePath: string) => {
-        const response = await fetch(imagePath);
-        const imageBytes = await response.arrayBuffer();
-        return await pdfDoc.embedJpg(imageBytes);
+        try {
+          const response = await fetch(imagePath);
+          if (!response.ok) {
+            throw new Error(`Failed to fetch image: ${response.statusText}`);
+          }
+          const imageBytes = await response.arrayBuffer();
+          
+          // Try PNG first (since template files are PNG despite .jpg extension)
+          // Then fallback to JPG if PNG fails
+          try {
+            return await pdfDoc.embedPng(imageBytes);
+          } catch (pngError) {
+            console.log('PNG embed failed, trying JPG:', imagePath);
+            return await pdfDoc.embedJpg(imageBytes);
+          }
+        } catch (error) {
+          console.error('Error loading image:', imagePath, error);
+          throw error;
+        }
       };
 
-      // Add all static pages (1-14)
+      // Page 1 - Cover page with dynamic "Valid Until" date (portrait orientation)
+      const page1Image = await fetchAndEmbedImage(page1);
+      const page1Page = pdfDoc.addPage([595.28, 841.89]); // A4 portrait
+      const page1Width = page1Page.getWidth();
+      const page1Height = page1Page.getHeight();
+      
+      // Draw the page 1 image
+      page1Page.drawImage(page1Image, {
+        x: 0,
+        y: 0,
+        width: page1Width,
+        height: page1Height,
+      });
+
+      // Add dynamic "Valid Until" date on page 1
+      const validityYears = parseInt(formData.validity || "1");
+      const validUntilDate = new Date();
+      validUntilDate.setFullYear(validUntilDate.getFullYear() + validityYears);
+      const validUntilText = validUntilDate.toLocaleDateString('en-GB', { 
+        day: 'numeric', 
+        month: 'long', 
+        year: 'numeric' 
+      });
+      
+      // Position for "Valid Until" date on page 1 (portrait orientation)
+      // Positioned on the blank line after "Valid Until"
+      page1Page.drawText(validUntilText, {
+        x: 250,
+        y: page1Height - 300,
+        size: 20,
+        font: helveticaBoldFont,
+        color: rgb(0, 0, 0),
+      });
+
+      // Add static pages 2-14
       const staticPages = [
-        page1, page2, page3, page4, page5, page6, page7,
+        page2, page3, page4, page5, page6, page7,
         page8, page9, page10, page11, page12, page13, page14
       ];
 
@@ -84,83 +134,146 @@ export const IDPGenerated = ({ formData }: IDPGeneratedProps) => {
         height,
       });
 
-      // Add user data on page 15 (coordinates adjusted based on the template)
-      // Surname
+      // Add user data on page 15 (coordinates calibrated to clean template)
+      // Template has 5 numbered lines at the top for user details
+      
+      // 1. Surname (Line 1)
       page15.drawText(formData.lastName?.toUpperCase() || "", {
         x: 95,
-        y: height - 155,
-        size: 11,
+        y: height - 85,
+        size: 13,
         font: helveticaBoldFont,
         color: rgb(0, 0, 0),
       });
 
-      // Given name
+      // 2. Given name (Line 2)
       page15.drawText(formData.firstName?.toUpperCase() || "", {
         x: 95,
-        y: height - 178,
-        size: 11,
-        font: helveticaFont,
+        y: height - 110,
+        size: 13,
+        font: helveticaBoldFont,
         color: rgb(0, 0, 0),
       });
 
-      // Country/Place of birth
-      page15.drawText(formData.country?.toUpperCase() || "", {
+      // 3. Country/Place of birth (Line 3)
+      page15.drawText(formData.birthCountry?.toUpperCase() || "", {
         x: 95,
-        y: height - 200,
-        size: 11,
-        font: helveticaFont,
+        y: height - 135,
+        size: 13,
+        font: helveticaBoldFont,
         color: rgb(0, 0, 0),
       });
 
-      // Date of birth
-      page15.drawText(formData.dateOfBirth || "", {
+      // 4. Date of birth (Line 4)
+      const birthDate = formData.birthDate ? new Date(formData.birthDate).toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+      }).replace(/ /g, '-') : "";
+      page15.drawText(birthDate, {
         x: 95,
-        y: height - 223,
-        size: 11,
-        font: helveticaFont,
+        y: height - 160,
+        size: 13,
+        font: helveticaBoldFont,
         color: rgb(0, 0, 0),
       });
 
-      // Permanent residence
-      const residence = formData.country?.toUpperCase() || "";
+      // 5. Permanent residence (Line 5)
+      const residence = formData.currentCountry?.toUpperCase() || "";
       page15.drawText(residence, {
         x: 95,
-        y: height - 245,
-        size: 11,
-        font: helveticaFont,
+        y: height - 185,
+        size: 13,
+        font: helveticaBoldFont,
         color: rgb(0, 0, 0),
       });
 
-      // Add photo if available
-      if (formData.photo) {
+      // Add selfie photo if available (positioned in the photo box on right side)
+      if (formData.selfie) {
         try {
-          const photoBytes = await fetch(formData.photo).then(res => res.arrayBuffer());
-          const photoImage = await pdfDoc.embedJpg(photoBytes);
+          const photoBytes = await fetch(formData.selfie).then(res => res.arrayBuffer());
+          // Try to embed as PNG first, fallback to JPG
+          let photoImage;
+          try {
+            photoImage = await pdfDoc.embedPng(photoBytes);
+          } catch {
+            photoImage = await pdfDoc.embedJpg(photoBytes);
+          }
+          // Photo box is on the right side of the page
           page15.drawImage(photoImage, {
-            x: 420,
-            y: height - 235,
-            width: 100,
-            height: 130,
+            x: 255,
+            y: height - 510,
+            width: 170,
+            height: 225,
           });
         } catch (e) {
-          console.log("Could not add photo:", e);
+          console.error("Could not add photo:", e);
         }
       }
 
-      // Add signature if available
+      // Add signature if available (positioned above "Signature de titulaire*" line)
       if (formData.signature) {
         try {
           const signatureBytes = await fetch(formData.signature).then(res => res.arrayBuffer());
           const signatureImage = await pdfDoc.embedPng(signatureBytes);
+          // Signature area is in the center of the page, above the signature line
           page15.drawImage(signatureImage, {
-            x: 380,
-            y: height - 750,
-            width: 120,
-            height: 40,
+            x: 230,
+            y: height - 585,
+            width: 180,
+            height: 50,
           });
         } catch (e) {
-          console.log("Could not add signature:", e);
+          console.error("Could not add signature:", e);
         }
+      }
+
+      // Add license classes/stamps in the circles (A, B, C, D, E)
+      // Template shows circles on the left side - A and B are empty, C/D/E have authority text
+      if (formData.licenseClasses && formData.licenseClasses.length > 0) {
+        // Positions based on the template's A, B, C, D, E circles on left side
+        // Circle centers measured from template - adjusted to center in each box
+        const stampPositions = [
+          { x: 114, y: height - 270, label: 'A' },  // A position (empty circle)
+          { x: 114, y: height - 350, label: 'B' },  // B position (empty circle)
+          { x: 260, y: height - 545, label: 'C' },  // C position (has authority text)
+          { x: 260, y: height - 680, label: 'D' },  // D position (has authority text)
+          { x: 260, y: height - 815, label: 'E' },  // E position (has authority text)
+        ];
+
+        const classMap: { [key: string]: number } = {
+          'A': 0,
+          'B': 1,
+          'C': 2,
+          'D': 3,
+          'E': 4
+        };
+
+        formData.licenseClasses.forEach((licenseClass: string) => {
+          const index = classMap[licenseClass];
+          if (index !== undefined && stampPositions[index]) {
+            const pos = stampPositions[index];
+            // Draw a stamp/seal to indicate the license class is valid
+            // Using a filled circle with blue color to simulate official stamp
+            page15.drawCircle({
+              x: pos.x,
+              y: pos.y,
+              size: 35,
+              borderColor: rgb(0, 0.2, 0.6),
+              borderWidth: 2.5,
+              color: rgb(0.3, 0.4, 0.9),
+              opacity: 0.6,
+            });
+            // Add "VALID" text overlay on the stamp
+            page15.drawText('VALID', {
+              x: pos.x - 20,
+              y: pos.y - 5,
+              size: 9,
+              font: helveticaBoldFont,
+              color: rgb(1, 1, 1),
+            });
+          }
+        });
       }
 
       // Page 16 - Back cover (static)
@@ -184,7 +297,8 @@ export const IDPGenerated = ({ formData }: IDPGeneratedProps) => {
       URL.revokeObjectURL(url);
     } catch (error) {
       console.error("Error generating PDF:", error);
-      alert("There was an error generating your IDP. Please try again.");
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      alert(`There was an error generating your IDP: ${errorMessage}\n\nPlease try again or contact support.`);
     }
   };
 

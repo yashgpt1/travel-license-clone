@@ -139,20 +139,22 @@ export const PhotoUpload = ({ onNext }: PhotoUploadProps) => {
               <img src={photos.selfie} alt="Selfie" className="max-h-64 mx-auto rounded" />
             </div>
           ) : (
-            <div className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary transition-colors">
-              <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-              <p className="text-sm text-muted-foreground mb-2">Click to upload or drag and drop</p>
-              <Input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                id="selfie"
-                onChange={(e) => handleFileChange("selfie", e.target.files?.[0] || null)}
-              />
-              <Label htmlFor="selfie" className="cursor-pointer">
-                <Button variant="outline" type="button">Upload a file</Button>
-              </Label>
-            </div>
+            <Label htmlFor="selfie" className="cursor-pointer">
+              <div className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary transition-colors">
+                <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                <p className="text-sm text-muted-foreground mb-2">Click to upload or drag and drop</p>
+                <Input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  id="selfie"
+                  onChange={(e) => handleFileChange("selfie", e.target.files?.[0] || null)}
+                />
+                <Button variant="outline" type="button" asChild>
+                  <span>Upload a file</span>
+                </Button>
+              </div>
+            </Label>
           )}
         </div>
 
@@ -172,20 +174,22 @@ export const PhotoUpload = ({ onNext }: PhotoUploadProps) => {
               <img src={photos.licenseFront} alt="License Front" className="max-h-64 mx-auto rounded" />
             </div>
           ) : (
-            <div className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary transition-colors">
-              <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-              <p className="text-sm text-muted-foreground mb-2">Upload front side of your license</p>
-              <Input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                id="licenseFront"
-                onChange={(e) => handleFileChange("licenseFront", e.target.files?.[0] || null)}
-              />
-              <Label htmlFor="licenseFront" className="cursor-pointer">
-                <Button variant="outline" type="button">Upload a file</Button>
-              </Label>
-            </div>
+            <Label htmlFor="licenseFront" className="cursor-pointer">
+              <div className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary transition-colors">
+                <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                <p className="text-sm text-muted-foreground mb-2">Upload front side of your license</p>
+                <Input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  id="licenseFront"
+                  onChange={(e) => handleFileChange("licenseFront", e.target.files?.[0] || null)}
+                />
+                <Button variant="outline" type="button" asChild>
+                  <span>Upload a file</span>
+                </Button>
+              </div>
+            </Label>
           )}
         </div>
 
@@ -205,20 +209,22 @@ export const PhotoUpload = ({ onNext }: PhotoUploadProps) => {
               <img src={photos.licenseBack} alt="License Back" className="max-h-64 mx-auto rounded" />
             </div>
           ) : (
-            <div className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary transition-colors">
-              <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-              <p className="text-sm text-muted-foreground mb-2">Upload back side of your license</p>
-              <Input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                id="licenseBack"
-                onChange={(e) => handleFileChange("licenseBack", e.target.files?.[0] || null)}
-              />
-              <Label htmlFor="licenseBack" className="cursor-pointer">
-                <Button variant="outline" type="button">Upload a file</Button>
-              </Label>
-            </div>
+            <Label htmlFor="licenseBack" className="cursor-pointer">
+              <div className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary transition-colors">
+                <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                <p className="text-sm text-muted-foreground mb-2">Upload back side of your license</p>
+                <Input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  id="licenseBack"
+                  onChange={(e) => handleFileChange("licenseBack", e.target.files?.[0] || null)}
+                />
+                <Button variant="outline" type="button" asChild>
+                  <span>Upload a file</span>
+                </Button>
+              </div>
+            </Label>
           )}
         </div>
 
@@ -277,19 +283,21 @@ export const PhotoUpload = ({ onNext }: PhotoUploadProps) => {
                   <img src={photos.signature} alt="Signature" className="max-h-32 mx-auto" />
                 </div>
               ) : (
-                <div className="border-2 border-dashed border-border rounded-lg p-8 text-center">
-                  <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                  <Input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    id="signature"
-                    onChange={(e) => handleFileChange("signature", e.target.files?.[0] || null)}
-                  />
-                  <Label htmlFor="signature" className="cursor-pointer">
-                    <Button variant="outline" type="button">Upload signature</Button>
-                  </Label>
-                </div>
+                <Label htmlFor="signature" className="cursor-pointer">
+                  <div className="border-2 border-dashed border-border rounded-lg p-8 text-center">
+                    <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      id="signature"
+                      onChange={(e) => handleFileChange("signature", e.target.files?.[0] || null)}
+                    />
+                    <Button variant="outline" type="button" asChild>
+                      <span>Upload signature</span>
+                    </Button>
+                  </div>
+                </Label>
               )}
             </TabsContent>
           </Tabs>
