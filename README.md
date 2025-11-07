@@ -1,73 +1,187 @@
-# Welcome to your Lovable project
+# International Driving Permit (IDP) Generator
 
-## Project info
+A modern web application for generating International Driving Permits based on the Convention of International Road Traffic of 19 September 1949 (United Nations).
 
-**URL**: https://lovable.dev/projects/df5b68fa-ecd9-4f6e-8560-57f31278cb05
+## 🌟 Features
 
-## How can I edit this code?
+- **Multi-step Form Process**: Intuitive step-by-step interface for collecting user information
+- **Dynamic PDF Generation**: Automatically generates a 16-page IDP document with user details
+- **Photo & Signature Upload**: Support for selfie, license photos, and digital signatures
+- **License Class Selection**: Choose from A, B, C, D, E license classes with visual stamps
+- **Plan Selection**: Choose validity period (1, 2, or 3 years)
+- **Responsive Design**: Works seamlessly on desktop and mobile devices
+- **Modern UI**: Built with shadcn/ui components and Tailwind CSS
 
-There are several ways of editing your application.
+## 📋 What Gets Generated
 
-**Use Lovable**
+The application generates a complete 16-page PDF document including:
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/df5b68fa-ecd9-4f6e-8560-57f31278cb05) and start prompting.
+- **Page 1**: Cover page with dynamic "Valid Until" date
+- **Pages 2-14**: Static template pages with IDP information
+- **Page 15**: Personalized page with:
+  - Surname and given name
+  - Country/place of birth
+  - Date of birth
+  - Permanent residence
+  - User photo
+  - Digital signature
+  - License class stamps (A, B, C, D, E)
+- **Page 16**: Back cover
 
-Changes made via Lovable will be committed automatically to this repo.
+## 🚀 Getting Started
 
-**Use your preferred IDE**
+### Prerequisites
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+- Node.js (v16 or higher)
+- npm or yarn
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### Installation
 
-Follow these steps:
+```bash
+# Clone the repository
+git clone https://github.com/yashgpt1/travel-license-clone.git
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+# Navigate to the project directory
+cd travel-license-clone
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+# Install dependencies
+npm install
 
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Start the development server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+The application will be available at `http://localhost:8080` (or the next available port).
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## 🛠️ Technologies Used
 
-**Use GitHub Codespaces**
+- **Frontend Framework**: React 18 with TypeScript
+- **Build Tool**: Vite
+- **UI Components**: shadcn/ui
+- **Styling**: Tailwind CSS
+- **PDF Generation**: pdf-lib
+- **Form Handling**: React hooks
+- **Icons**: Lucide React
+- **Routing**: React Router DOM
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## 📦 Project Structure
 
-## What technologies are used for this project?
+```
+travel-license-clone/
+├── src/
+│   ├── components/
+│   │   └── idp/
+│   │       └── steps/
+│   │           ├── LicenseCheck.tsx      # Initial license verification
+│   │           ├── CountrySelection.tsx  # Country selection
+│   │           ├── DriverDetails.tsx     # Personal information form
+│   │           ├── PhotoUpload.tsx       # Photo and signature upload
+│   │           ├── PlanSelection.tsx     # Validity period selection
+│   │           └── IDPGenerated.tsx      # PDF generation logic
+│   ├── assets/
+│   │   └── idp-template/                 # PDF template images (pages 1-16)
+│   ├── pages/
+│   │   └── Index.tsx                     # Main application page
+│   └── App.tsx                           # Application root
+├── netlify.toml                          # Netlify deployment config
+└── package.json
+```
 
-This project is built with:
+## 🎨 Key Features Explained
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+### PDF Generation
+The application uses `pdf-lib` to dynamically generate PDFs with:
+- Embedded template images (PNG format)
+- Dynamic text overlay for user details
+- Image embedding for photos and signatures
+- Custom stamps for license classes
 
-## How can I deploy this project?
+### Form Flow
+1. **License Check**: Verify if user has a valid driver's license
+2. **Country Selection**: Choose issuing country
+3. **Driver Details**: Enter personal information and license classes
+4. **Photo Upload**: Upload selfie, license photos, and signature
+5. **Plan Selection**: Choose validity period (1-3 years)
+6. **PDF Generation**: Download the completed IDP
 
-Simply open [Lovable](https://lovable.dev/projects/df5b68fa-ecd9-4f6e-8560-57f31278cb05) and click on Share -> Publish.
+### Photo Upload Options
+- **Selfie/Passport Photo**: Direct upload or drag & drop
+- **License Photos**: Front and back side (optional)
+- **E-Signature**: Three options:
+  - Draw with mouse/touch
+  - Type your name (converted to cursive)
+  - Upload signature image
 
-## Can I connect a custom domain to my Lovable project?
+## 🚢 Deployment
 
-Yes, you can!
+### Netlify (Recommended)
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+The project is configured for easy Netlify deployment:
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+```bash
+# Build the project
+npm run build
+
+# Deploy to Netlify
+# Option 1: Drag & drop the 'dist' folder to https://app.netlify.com/drop
+# Option 2: Use Netlify CLI
+netlify deploy --prod
+```
+
+The `netlify.toml` file is already configured with:
+- Build command: `npm run build`
+- Publish directory: `dist`
+- SPA routing support
+
+### Other Platforms
+
+The project can be deployed to any static hosting service:
+- Vercel
+- GitHub Pages
+- AWS S3 + CloudFront
+- Firebase Hosting
+
+## 🔧 Development
+
+### Available Scripts
+
+```bash
+# Start development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
+
+# Lint code
+npm run lint
+```
+
+### Environment Setup
+
+No environment variables are required for basic functionality.
+
+## 📝 License
+
+This project is open source and available under the MIT License.
+
+## 🤝 Contributing
+
+Contributions, issues, and feature requests are welcome!
+
+## 👤 Author
+
+**Yash Gupta**
+- GitHub: [@yashgpt1](https://github.com/yashgpt1)
+
+## 🙏 Acknowledgments
+
+- Built with [Lovable](https://lovable.dev)
+- UI components from [shadcn/ui](https://ui.shadcn.com)
+- PDF generation powered by [pdf-lib](https://pdf-lib.js.org)
+
+---
+
+**Note**: This is a demonstration project. For official International Driving Permits, please contact your local automobile association or authorized issuing authority.
