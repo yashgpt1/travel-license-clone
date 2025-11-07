@@ -1,7 +1,25 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, Download, Mail } from "lucide-react";
-import jsPDF from "jspdf";
+import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
+
+// Import static page templates
+import page1 from "@/assets/idp-template/page_1.jpg";
+import page2 from "@/assets/idp-template/page_2.jpg";
+import page3 from "@/assets/idp-template/page_3.jpg";
+import page4 from "@/assets/idp-template/page_4.jpg";
+import page5 from "@/assets/idp-template/page_5.jpg";
+import page6 from "@/assets/idp-template/page_6.jpg";
+import page7 from "@/assets/idp-template/page_7.jpg";
+import page8 from "@/assets/idp-template/page_8.jpg";
+import page9 from "@/assets/idp-template/page_9.jpg";
+import page10 from "@/assets/idp-template/page_10.jpg";
+import page11 from "@/assets/idp-template/page_11.jpg";
+import page12 from "@/assets/idp-template/page_12.jpg";
+import page13 from "@/assets/idp-template/page_13.jpg";
+import page14 from "@/assets/idp-template/page_14.jpg";
+import page15Template from "@/assets/idp-template/page_15.jpg";
+import page16 from "@/assets/idp-template/page_16.jpg";
 
 interface IDPGeneratedProps {
   formData: any;
@@ -9,156 +27,152 @@ interface IDPGeneratedProps {
 
 export const IDPGenerated = ({ formData }: IDPGeneratedProps) => {
   const handleDownload = async () => {
-    const pdf = new jsPDF({
-      orientation: "portrait",
-      unit: "mm",
-      format: "a4"
-    });
+    try {
+      // Create a new PDF document
+      const pdfDoc = await PDFDocument.create();
+      const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+      const helveticaBoldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
-    const issueDate = new Date();
-    const expiryDate = new Date(issueDate);
-    expiryDate.setFullYear(expiryDate.getFullYear() + parseInt(formData.validity || "1"));
+      // Helper function to fetch and embed images
+      const fetchAndEmbedImage = async (imagePath: string) => {
+        const response = await fetch(imagePath);
+        const imageBytes = await response.arrayBuffer();
+        return await pdfDoc.embedJpg(imageBytes);
+      };
 
-    // Cover Page
-    pdf.setFillColor(0, 102, 51);
-    pdf.rect(0, 0, 210, 297, "F");
-    
-    pdf.setTextColor(255, 255, 255);
-    pdf.setFontSize(28);
-    pdf.setFont("helvetica", "bold");
-    pdf.text("INTERNATIONAL", 105, 80, { align: "center" });
-    pdf.text("DRIVING PERMIT", 105, 95, { align: "center" });
-    
-    pdf.setFontSize(14);
-    pdf.setFont("helvetica", "normal");
-    pdf.text("Convention on Road Traffic", 105, 115, { align: "center" });
-    pdf.text("Vienna, 1968 / Geneva, 1949", 105, 125, { align: "center" });
-    
-    pdf.setFontSize(20);
-    pdf.setFont("helvetica", "bold");
-    pdf.text(formData.selectedCountry || "INTERNATIONAL", 105, 150, { align: "center" });
-    
-    pdf.setFontSize(12);
-    pdf.setFont("helvetica", "normal");
-    pdf.text(`Issue Date: ${issueDate.toLocaleDateString()}`, 105, 200, { align: "center" });
-    pdf.text(`Valid Until: ${expiryDate.toLocaleDateString()}`, 105, 210, { align: "center" });
-    pdf.text(`Permit No: IDP-${Date.now().toString().slice(-8)}`, 105, 220, { align: "center" });
+      // Add all static pages (1-14)
+      const staticPages = [
+        page1, page2, page3, page4, page5, page6, page7,
+        page8, page9, page10, page11, page12, page13, page14
+      ];
 
-    // Page 2 - Personal Information
-    pdf.addPage();
-    pdf.setFillColor(255, 255, 255);
-    pdf.rect(0, 0, 210, 297, "F");
-    
-    pdf.setTextColor(0, 0, 0);
-    pdf.setFontSize(18);
-    pdf.setFont("helvetica", "bold");
-    pdf.text("HOLDER INFORMATION", 105, 30, { align: "center" });
-    
-    // Add photo if available
-    if (formData.photo) {
-      try {
-        pdf.addImage(formData.photo, "JPEG", 15, 45, 40, 50);
-        pdf.rect(15, 45, 40, 50);
-      } catch (e) {
-        console.log("Could not add photo");
+      for (const pagePath of staticPages) {
+        const pageImage = await fetchAndEmbedImage(pagePath);
+        const page = pdfDoc.addPage([595.28, 841.89]); // A4 size in points
+        const { width, height } = page.getSize();
+        page.drawImage(pageImage, {
+          x: 0,
+          y: 0,
+          width,
+          height,
+        });
       }
-    } else {
-      pdf.rect(15, 45, 40, 50);
-      pdf.setFontSize(10);
-      pdf.text("Photo", 35, 72, { align: "center" });
-    }
-    
-    // Personal details
-    pdf.setFontSize(11);
-    pdf.setFont("helvetica", "bold");
-    let yPos = 50;
-    const leftCol = 65;
-    
-    pdf.text("1. SURNAME:", leftCol, yPos);
-    pdf.setFont("helvetica", "normal");
-    pdf.text(formData.lastName?.toUpperCase() || "N/A", leftCol + 40, yPos);
-    
-    yPos += 10;
-    pdf.setFont("helvetica", "bold");
-    pdf.text("2. GIVEN NAME:", leftCol, yPos);
-    pdf.setFont("helvetica", "normal");
-    pdf.text(formData.firstName || "N/A", leftCol + 40, yPos);
-    
-    yPos += 10;
-    pdf.setFont("helvetica", "bold");
-    pdf.text("3. DATE OF BIRTH:", leftCol, yPos);
-    pdf.setFont("helvetica", "normal");
-    pdf.text(formData.dateOfBirth || "N/A", leftCol + 40, yPos);
-    
-    yPos += 10;
-    pdf.setFont("helvetica", "bold");
-    pdf.text("4. ADDRESS:", leftCol, yPos);
-    pdf.setFont("helvetica", "normal");
-    const address = `${formData.address || ""}, ${formData.city || ""}, ${formData.state || ""} ${formData.zipCode || ""}`;
-    pdf.text(address, leftCol + 40, yPos);
-    
-    yPos += 10;
-    pdf.setFont("helvetica", "bold");
-    pdf.text("5. COUNTRY:", leftCol, yPos);
-    pdf.setFont("helvetica", "normal");
-    pdf.text(formData.country || "N/A", leftCol + 40, yPos);
-    
-    yPos += 10;
-    pdf.setFont("helvetica", "bold");
-    pdf.text("6. LICENSE NO:", leftCol, yPos);
-    pdf.setFont("helvetica", "normal");
-    pdf.text(formData.licenseNumber || "N/A", leftCol + 40, yPos);
 
-    // Signature
-    yPos += 20;
-    pdf.setFont("helvetica", "bold");
-    pdf.text("7. SIGNATURE:", leftCol, yPos);
-    if (formData.signature) {
-      try {
-        pdf.addImage(formData.signature, "PNG", leftCol, yPos + 5, 50, 15);
-      } catch (e) {
-        console.log("Could not add signature");
+      // Page 15 - Dynamic user data page
+      const page15Image = await fetchAndEmbedImage(page15Template);
+      const page15 = pdfDoc.addPage([595.28, 841.89]);
+      const { width, height } = page15.getSize();
+      
+      // Draw the template background
+      page15.drawImage(page15Image, {
+        x: 0,
+        y: 0,
+        width,
+        height,
+      });
+
+      // Add user data on page 15 (coordinates adjusted based on the template)
+      // Surname
+      page15.drawText(formData.lastName?.toUpperCase() || "", {
+        x: 95,
+        y: height - 155,
+        size: 11,
+        font: helveticaBoldFont,
+        color: rgb(0, 0, 0),
+      });
+
+      // Given name
+      page15.drawText(formData.firstName?.toUpperCase() || "", {
+        x: 95,
+        y: height - 178,
+        size: 11,
+        font: helveticaFont,
+        color: rgb(0, 0, 0),
+      });
+
+      // Country/Place of birth
+      page15.drawText(formData.country?.toUpperCase() || "", {
+        x: 95,
+        y: height - 200,
+        size: 11,
+        font: helveticaFont,
+        color: rgb(0, 0, 0),
+      });
+
+      // Date of birth
+      page15.drawText(formData.dateOfBirth || "", {
+        x: 95,
+        y: height - 223,
+        size: 11,
+        font: helveticaFont,
+        color: rgb(0, 0, 0),
+      });
+
+      // Permanent residence
+      const residence = formData.country?.toUpperCase() || "";
+      page15.drawText(residence, {
+        x: 95,
+        y: height - 245,
+        size: 11,
+        font: helveticaFont,
+        color: rgb(0, 0, 0),
+      });
+
+      // Add photo if available
+      if (formData.photo) {
+        try {
+          const photoBytes = await fetch(formData.photo).then(res => res.arrayBuffer());
+          const photoImage = await pdfDoc.embedJpg(photoBytes);
+          page15.drawImage(photoImage, {
+            x: 420,
+            y: height - 235,
+            width: 100,
+            height: 130,
+          });
+        } catch (e) {
+          console.log("Could not add photo:", e);
+        }
       }
+
+      // Add signature if available
+      if (formData.signature) {
+        try {
+          const signatureBytes = await fetch(formData.signature).then(res => res.arrayBuffer());
+          const signatureImage = await pdfDoc.embedPng(signatureBytes);
+          page15.drawImage(signatureImage, {
+            x: 380,
+            y: height - 750,
+            width: 120,
+            height: 40,
+          });
+        } catch (e) {
+          console.log("Could not add signature:", e);
+        }
+      }
+
+      // Page 16 - Back cover (static)
+      const page16Image = await fetchAndEmbedImage(page16);
+      const page16Page = pdfDoc.addPage([595.28, 841.89]);
+      page16Page.drawImage(page16Image, {
+        x: 0,
+        y: 0,
+        width: page16Page.getWidth(),
+        height: page16Page.getHeight(),
+      });
+
+      // Save the PDF
+      const pdfBytes = await pdfDoc.save();
+      const blob = new Blob([pdfBytes.buffer as ArrayBuffer], { type: "application/pdf" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `IDP_${formData.firstName}_${formData.lastName}.pdf`;
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      alert("There was an error generating your IDP. Please try again.");
     }
-
-    // Page 3 - Vehicle Categories
-    pdf.addPage();
-    pdf.setFillColor(255, 255, 255);
-    pdf.rect(0, 0, 210, 297, "F");
-    
-    pdf.setTextColor(0, 0, 0);
-    pdf.setFontSize(18);
-    pdf.setFont("helvetica", "bold");
-    pdf.text("AUTHORIZED VEHICLE CATEGORIES", 105, 30, { align: "center" });
-    
-    pdf.setFontSize(11);
-    pdf.setFont("helvetica", "normal");
-    yPos = 50;
-    const categories = [
-      { code: "A", desc: "Motorcycles" },
-      { code: "B", desc: "Automobiles (passenger cars)" },
-      { code: "C", desc: "Trucks/Lorries" },
-      { code: "D", desc: "Buses" },
-      { code: "E", desc: "Combinations of vehicles" }
-    ];
-    
-    categories.forEach(cat => {
-      pdf.setFont("helvetica", "bold");
-      pdf.text(`Category ${cat.code}:`, 20, yPos);
-      pdf.setFont("helvetica", "normal");
-      pdf.text(cat.desc, 60, yPos);
-      yPos += 12;
-    });
-    
-    // Footer
-    yPos = 260;
-    pdf.setFontSize(10);
-    pdf.setFont("helvetica", "italic");
-    pdf.text("This International Driving Permit is valid for one year from the date of issue.", 105, yPos, { align: "center" });
-    pdf.text("It must be accompanied by your valid national driver's license.", 105, yPos + 7, { align: "center" });
-
-    // Save the PDF
-    pdf.save(`IDP_${formData.firstName}_${formData.lastName}.pdf`);
   };
 
   const handleEmail = () => {
