@@ -1,7 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, Download, Mail } from "lucide-react";
-import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
+import { PDFDocument, rgb, StandardFonts, degrees } from "pdf-lib";
 
 // Import static page templates
 import page1 from "@/assets/idp-template/page_1.jpg";
@@ -46,16 +46,29 @@ export const IDPGenerated = ({ formData }: IDPGeneratedProps) => {
         page8, page9, page10, page11, page12, page13, page14
       ];
 
-      for (const pagePath of staticPages) {
+      for (let i = 0; i < staticPages.length; i++) {
+        const pagePath = staticPages[i];
         const pageImage = await fetchAndEmbedImage(pagePath);
         const page = pdfDoc.addPage([595.28, 841.89]); // A4 size in points
         const { width, height } = page.getSize();
-        page.drawImage(pageImage, {
-          x: 0,
-          y: 0,
-          width,
-          height,
-        });
+        
+        // First page needs to be rotated 90 degrees clockwise
+        if (i === 0) {
+          page.drawImage(pageImage, {
+            x: width,
+            y: 0,
+            width: height,
+            height: width,
+            rotate: degrees(90),
+          });
+        } else {
+          page.drawImage(pageImage, {
+            x: 0,
+            y: 0,
+            width,
+            height,
+          });
+        }
       }
 
       // Page 15 - Dynamic user data page
