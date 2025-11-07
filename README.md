@@ -178,7 +178,6 @@ Contributions, issues, and feature requests are welcome!
 
 ## 🙏 Acknowledgments
 
-- Built with [Lovable](https://lovable.dev)
 - UI components from [shadcn/ui](https://ui.shadcn.com)
 - PDF generation powered by [pdf-lib](https://pdf-lib.js.org)
 
